@@ -1,23 +1,33 @@
 package com.proxykit.sdk.core.storage
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 
 /**
  * Secure storage for sensitive data using Android Keystore
  */
 internal class SecureStorage(context: Context) {
     
-    private val masterKey = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-    
-    private val sharedPreferences = EncryptedSharedPreferences.create(
-        "proxykit_secure_prefs",
-        masterKey,
-        context,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    private val sharedPreferences = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        // Use MasterKey.Builder for API 23+ (modern approach)
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        
+        EncryptedSharedPreferences.create(
+            context,
+            "proxykit_secure_prefs",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } else {
+        // For API < 23, use regular SharedPreferences (less secure but compatible)
+        context.getSharedPreferences("proxykit_prefs", Context.MODE_PRIVATE)
+    }
     
     /**
      * Store session token

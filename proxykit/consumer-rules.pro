@@ -1,7 +1,7 @@
 # ProxyKit ProGuard Rules
 
 # Keep all public API classes
--keep class com.proxykit.sdk.AIProxy { *; }
+-keep class com.proxykit.sdk.ProxyKit { *; }
 -keep class com.proxykit.sdk.SecureProxy { *; }
 -keep class com.proxykit.sdk.core.models.** { *; }
 -keep class com.proxykit.sdk.core.Configuration { *; }

@@ -50,10 +50,12 @@ dependencies {
     
     // Networking
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp-sse:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
@@ -81,6 +83,44 @@ publishing {
 
             afterEvaluate {
                 from(components["release"])
+            }
+            
+            pom {
+                name.set("ProxyKit Android SDK")
+                description.set("Secure AI proxy SDK for Android apps")
+                url.set("https://github.com/proxy-kit/android-sdk")
+                
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id.set("proxykit")
+                        name.set("ProxyKit Team")
+                        email.set("support@secureapikey.com")
+                    }
+                }
+                
+                scm {
+                    connection.set("scm:git:git://github.com/proxy-kit/android-sdk.git")
+                    developerConnection.set("scm:git:ssh://github.com/proxy-kit/android-sdk.git")
+                    url.set("https://github.com/proxy-kit/android-sdk")
+                }
+            }
+        }
+    }
+    
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/proxy-kit/android-sdk")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR") ?: project.findProperty("gpr.user") as String?
+                password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key") as String?
             }
         }
     }

@@ -48,13 +48,13 @@ class SecureProxy(
         // Make API call
         val response = when (activeModel) {
             is ChatModel.OpenAI -> {
-                AIProxy.openai.chat.completions.create(
+                ProxyKit.openai.chat.completions.create(
                     model = activeModel.rawValue,
                     messages = messages
                 )
             }
             is ChatModel.Anthropic -> {
-                AIProxy.anthropic.chat.completions.create(
+                ProxyKit.anthropic.chat.completions.create(
                     model = activeModel.rawValue,
                     messages = messages
                 )
@@ -106,13 +106,13 @@ class SecureProxy(
         // Stream from API
         val stream = when (activeModel) {
             is ChatModel.OpenAI -> {
-                AIProxy.openai.chat.completions.stream(
+                ProxyKit.openai.chat.completions.stream(
                     model = activeModel.rawValue,
                     messages = messages
                 )
             }
             is ChatModel.Anthropic -> {
-                AIProxy.anthropic.chat.completions.stream(
+                ProxyKit.anthropic.chat.completions.stream(
                     model = activeModel.rawValue,
                     messages = messages
                 )
@@ -124,17 +124,10 @@ class SecureProxy(
             val fullMessage = StringBuilder()
             stream.collect { chunk ->
                 chunk.choices.firstOrNull()?.delta?.content?.let { content ->
-                    when (content) {
-                        is MessageContent.Text -> {
-                            fullMessage.append(content.text)
-                            emit(content.text)
-                        }
-                        is MessageContent.Parts -> {
-                            val text = content.parts.filterIsInstance<ContentPart.Text>()
-                                .joinToString("") { it.text }
-                            fullMessage.append(text)
-                            emit(text)
-                        }
+                    // content is already a String from DeltaContent
+                    if (content.isNotEmpty()) {
+                        fullMessage.append(content)
+                        emit(content)
                     }
                 }
             }
@@ -168,7 +161,7 @@ class SecureProxy(
         @JvmStatic
         fun configure(context: Context, appId: String): Exception? {
             return try {
-                AIProxy.configure()
+                ProxyKit.configure()
                     .withAppId(appId)
                     .build(context)
                 null

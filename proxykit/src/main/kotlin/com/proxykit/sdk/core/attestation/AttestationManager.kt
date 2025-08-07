@@ -15,12 +15,12 @@ import kotlinx.serialization.json.Json
 /**
  * Manages device attestation using Play Integrity API
  */
-internal class AttestationManager(
+class AttestationManager internal constructor(
     private val context: Context,
     private val appId: String,
     private val networkClient: NetworkClient,
-    private val storage: SecureStorage,
-    private val sessionManager: SessionManager
+    internal val storage: SecureStorage,
+    internal val sessionManager: SessionManager
 ) {
     private val integrityManager = IntegrityManagerFactory.create(context)
     

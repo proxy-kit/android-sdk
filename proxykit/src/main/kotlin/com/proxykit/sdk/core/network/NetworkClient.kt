@@ -9,8 +9,10 @@ import com.proxykit.sdk.core.network.interceptors.RetryInterceptor
 import com.proxykit.sdk.core.utils.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -23,21 +25,20 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCancellableCoroutine
 
 /**
  * Network client for API communication
  */
-internal class NetworkClient(
-    private val configuration: Configuration,
-    private val sessionManager: SessionManager
+class NetworkClient internal constructor(
+    internal val configuration: Configuration,
+    internal val sessionManager: SessionManager
 ) {
-    private val json = Json {
+    internal val json = Json {
         ignoreUnknownKeys = true
         coerceInputValues = true
     }
     
-    private val client = OkHttpClient.Builder()
+    internal val client = OkHttpClient.Builder()
         .connectTimeout(configuration.timeout, TimeUnit.MILLISECONDS)
         .readTimeout(configuration.timeout, TimeUnit.MILLISECONDS)
         .writeTimeout(configuration.timeout, TimeUnit.MILLISECONDS)
@@ -53,7 +54,7 @@ internal class NetworkClient(
     /**
      * Make a GET request
      */
-    suspend inline fun <reified T> get(
+    internal suspend inline fun <reified T> get(
         path: String,
         headers: Map<String, String> = emptyMap()
     ): T {
@@ -66,13 +67,13 @@ internal class NetworkClient(
             }
             .build()
         
-        return executeRequest(request)
+        return executeRequest<T>(request)
     }
     
     /**
      * Make a POST request
      */
-    suspend inline fun <reified T> post(
+    internal suspend inline fun <reified T> post(
         path: String,
         body: Any,
         headers: Map<String, String> = emptyMap()
@@ -90,13 +91,13 @@ internal class NetworkClient(
             }
             .build()
         
-        return executeRequest(request)
+        return executeRequest<T>(request)
     }
     
     /**
      * Stream response using Server-Sent Events
      */
-    suspend inline fun <reified T> stream(
+    internal suspend inline fun <reified T> stream(
         path: String,
         body: Any,
         headers: Map<String, String> = emptyMap()
@@ -176,6 +177,7 @@ internal class NetworkClient(
                 }
                 
                 val body = response.body?.string() ?: ""
+                @Suppress("UNCHECKED_CAST")
                 val result = when (T::class) {
                     Unit::class -> Unit as T
                     String::class -> body as T

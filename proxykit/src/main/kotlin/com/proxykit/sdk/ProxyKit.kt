@@ -9,6 +9,7 @@ import com.proxykit.sdk.core.attestation.SessionManager
 import com.proxykit.sdk.core.models.ProxyKitError
 import com.proxykit.sdk.core.network.NetworkClient
 import com.proxykit.sdk.core.providers.AnthropicClient
+import com.proxykit.sdk.core.providers.ChatProvider
 import com.proxykit.sdk.core.providers.OpenAIClient
 import com.proxykit.sdk.core.storage.SecureStorage
 import com.proxykit.sdk.core.utils.Logger
@@ -20,8 +21,8 @@ import kotlinx.coroutines.launch
  * Main entry point for ProxyKit SDK
  * Provides direct API access with full control
  */
-object AIProxy {
-    private var instance: AIProxyInstance? = null
+object ProxyKit {
+    private var instance: ProxyKitInstance? = null
     
     /**
      * Configure the SDK
@@ -36,24 +37,24 @@ object AIProxy {
      */
     internal fun initialize(context: Context, configuration: Configuration) {
         if (instance != null) {
-            throw ProxyKitError.ConfigurationError("AIProxy is already configured")
+            throw ProxyKitError.ConfigurationError("ProxyKit is already configured")
         }
         
-        instance = AIProxyInstance(context.applicationContext, configuration)
+        instance = ProxyKitInstance(context.applicationContext, configuration)
     }
     
     /**
      * OpenAI API access
      */
     @JvmStatic
-    val openai: OpenAIClient
+    val openai: ChatProvider
         get() = getInstance().openAIClient
     
     /**
      * Anthropic API access
      */
     @JvmStatic
-    val anthropic: AnthropicClient
+    val anthropic: ChatProvider
         get() = getInstance().anthropicClient
     
     /**
@@ -110,7 +111,7 @@ object AIProxy {
     val attestationStatus: AttestationStatus
         get() = instance?.attestationManager?.currentStatus ?: AttestationStatus.NotStarted
     
-    private fun getInstance(): AIProxyInstance {
+    private fun getInstance(): ProxyKitInstance {
         return instance ?: throw ProxyKitError.NotConfigured
     }
 }
@@ -118,7 +119,7 @@ object AIProxy {
 /**
  * Internal instance holder
  */
-private class AIProxyInstance(
+private class ProxyKitInstance(
     context: Context,
     val configuration: Configuration
 ) {
@@ -139,7 +140,7 @@ private class AIProxyInstance(
     
     init {
         Logger.configure(configuration.logLevel)
-        Logger.info("AIProxy initialized with app ID: ${configuration.appId}")
+        Logger.info("ProxyKit initialized with app ID: ${configuration.appId}")
         
         // Perform initial attestation in background
         CoroutineScope(Dispatchers.IO).launch {
@@ -159,6 +160,6 @@ private class AIProxyInstance(
  */
 fun Configuration.Builder.build(context: Context): Configuration {
     val config = build()
-    AIProxy.initialize(context, config)
+    ProxyKit.initialize(context, config)
     return config
 }

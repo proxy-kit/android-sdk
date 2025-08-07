@@ -6,7 +6,7 @@ import com.proxykit.sdk.core.Configuration
 /**
  * Internal logger for SDK
  */
-internal object Logger {
+object Logger {
     private const val TAG = "ProxyKit"
     private var logLevel: Configuration.LogLevel = Configuration.LogLevel.ERROR
     

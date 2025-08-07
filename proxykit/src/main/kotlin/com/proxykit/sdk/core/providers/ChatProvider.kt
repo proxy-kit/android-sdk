@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 /**
  * Base class for chat providers
  */
-internal abstract class ChatProvider(
+abstract class ChatProvider(
     protected val networkClient: NetworkClient,
     protected val attestationManager: AttestationManager
 ) {

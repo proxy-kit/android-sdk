@@ -24,13 +24,13 @@ In Google Play Console:
 ### 2. Initialize
 
 ```kotlin
-import com.proxykit.sdk.AIProxy
+import com.proxykit.sdk.ProxyKit
 
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        AIProxy.configure()
+        ProxyKit.configure()
             .withAppId("app_xxxxxxxxxxxxx") // Get from dashboard
             .build(this)
     }
@@ -42,7 +42,7 @@ class MyApplication : Application() {
 ### Basic Chat
 
 ```kotlin
-val response = AIProxy.openai.chat.completions.create(
+val response = ProxyKit.openai.chat.completions.create(
     model = "gpt-4o",
     messages = listOf(
         ChatMessage.user("Hello!")
@@ -55,7 +55,7 @@ println(response.choices.first().message.content)
 ### Streaming
 
 ```kotlin
-val stream = AIProxy.openai.chat.completions.stream(
+val stream = ProxyKit.openai.chat.completions.stream(
     model = "gpt-4o",
     messages = messages
 )
@@ -136,7 +136,7 @@ fun ChatScreen() {
 
 ```kotlin
 try {
-    val response = AIProxy.openai.chat.completions.create(...)
+    val response = ProxyKit.openai.chat.completions.create(...)
 } catch (e: ProxyKitError) {
     when (e) {
         is ProxyKitError.AttestationFailed -> {
